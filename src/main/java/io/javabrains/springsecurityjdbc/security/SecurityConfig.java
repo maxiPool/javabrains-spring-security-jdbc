@@ -21,17 +21,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     // Authentication
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.jdbcAuthentication() // Configure a data source Bean to tell how to access the JDBC database
-        // Spring Boot knows it should configure the H2 DB as the data source here.
-        // Thanks Spring Boot! No need to create a Bean for the data source.
-        // this data source could point to any database we have set for this Bean
+        auth.jdbcAuthentication()
                 .dataSource(this.dataSource)
-        // --> If we give Spring Security a clean DB, it will create a User table and the authority table for us
-        // now we have our H2 DB populated with a couple of tables: User, Authorities
-                .withDefaultSchema()
-        // We can have a bunch of users created for that datasource.
-                .withUser(User.withUsername("user").password("pass").roles("USER"))
-                .withUser(User.withUsername("admin").password("pass").roles("ADMIN"));
+                .usersByUsernameQuery("SELECT username,password,enabled FROM users WHERE username=?")
+                .authoritiesByUsernameQuery("SELECT username,authority FROM authorities WHERE username=?");
     }
 
     // Authorization
